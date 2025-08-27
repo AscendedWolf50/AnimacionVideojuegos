@@ -46,7 +46,7 @@ public class RecoilCameraKick : MonoBehaviour
             t += Time.deltaTime;
             float k = t / Mathf.Max(0.0001f, peak);
             for (int i = 0; i < perlins.Length; i++)
-                if (perlins[i]) perlins[i].AmplitudeGain = Mathf.Lerp(baseAmplitude[i], baseAmplitude[i] + strength, k);
+                if (perlins[i]) perlins[i].AmplitudeGain = Mathf.Lerp(baseAmplitude[i], baseAmplitude[i]+ strength, k);
             yield return null;
         }
 

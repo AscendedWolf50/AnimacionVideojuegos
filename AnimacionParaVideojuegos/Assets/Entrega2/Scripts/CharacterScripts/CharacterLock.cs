@@ -1,5 +1,5 @@
 #if UNITY_EDITOR
-using UnityEditor; // para Handles en el editor
+using UnityEditor; 
 #endif
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,26 +11,25 @@ namespace GA.Sessions.Class_03.Scripts
     {
         [Header("Detección")]
         [SerializeField] private Camera camera;
-        [SerializeField] private LayerMask detectionMask;
+        [SerializeField] private LayerMask targetMask;    // enemigos
+        [SerializeField] private LayerMask obstacleMask;  // muros / entorno
         [SerializeField] private float detectionRadius = 15f;
-        [SerializeField] private float detectionAngle = 60f; 
+        [SerializeField] private float detectionAngle = 60f;
 
         [Header("Opcional (solo para dibujar gizmos)")]
         [SerializeField] private Color gizmoColor = new Color(0.1f, 0.6f, 1f, 0.6f);
 
         public Character ParentCharacter { get; set; }
 
-       
         private List<Transform> candidates = new List<Transform>();
         private int currentIndex = -1;
 
-        
-        // OnLock
+        // ================= LOCK  =================
         public void OnLock(InputAction.CallbackContext ctx)
         {
             if (!ctx.started) return;
 
-           
+            // Si ya hay un lock, se libera
             if (ParentCharacter != null && ParentCharacter.LockTarget != null)
             {
                 ParentCharacter.LockTarget = null;
@@ -38,12 +37,12 @@ namespace GA.Sessions.Class_03.Scripts
                 return;
             }
 
-           
-            Collider[] detectedObjects = Physics.OverlapSphere(transform.position, detectionRadius, detectionMask);
+            // Detecta enemigos
+            Collider[] detectedObjects = Physics.OverlapSphere(transform.position, detectionRadius, targetMask);
             if (detectedObjects.Length == 0) return;
 
             int closestIndex = -1;
-            float bestScore = float.MaxValue; // menor = mejor
+            float bestScore = float.MaxValue;
 
             Vector3 camForward = camera != null ? camera.transform.forward : transform.forward;
             for (int i = 0; i < detectedObjects.Length; i++)
@@ -55,13 +54,11 @@ namespace GA.Sessions.Class_03.Scripts
                 Vector3 dirFromCamera = col.transform.position - (camera != null ? camera.transform.position : transform.position);
                 float angle = Vector3.Angle(camForward, dirFromCamera.normalized);
 
-               
                 if (angle > detectionAngle) continue;
 
                 float distance = Vector3.Distance(transform.position, col.transform.position);
 
-               
-                float score = angle * 10f + distance; 
+                float score = angle * 10f + distance;
                 if (score < bestScore)
                 {
                     bestScore = score;
@@ -69,46 +66,28 @@ namespace GA.Sessions.Class_03.Scripts
                 }
             }
 
-            if (closestIndex == -1)
-            {
-                
-                float bestDist = float.MaxValue;
-                for (int i = 0; i < detectedObjects.Length; i++)
-                {
-                    float d = Vector3.Distance(transform.position, detectedObjects[i].transform.position);
-                    if (d < bestDist)
-                    {
-                        bestDist = d;
-                        closestIndex = i;
-                    }
-                }
-            }
-
             if (closestIndex != -1)
             {
                 ParentCharacter.LockTarget = detectedObjects[closestIndex].transform;
 
-                
                 UpdateCandidates();
                 currentIndex = candidates.IndexOf(ParentCharacter.LockTarget);
                 if (currentIndex < 0) currentIndex = 0;
             }
         }
 
-        // OnSwitchTarget: vinculado al input para "cambiar objetivo" (ej. Q)
+        // ================= SWITCH TARGET =================
         public void OnSwitchTarget(InputAction.CallbackContext ctx)
         {
             if (!ctx.performed) return;
             NextTarget();
         }
 
-       
         public void OnNextTarget()
         {
             NextTarget();
         }
 
-        // --- alternar ---
         private void NextTarget()
         {
             UpdateCandidates();
@@ -120,7 +99,6 @@ namespace GA.Sessions.Class_03.Scripts
                 return;
             }
 
-         
             if (ParentCharacter.LockTarget == null)
             {
                 currentIndex = 0;
@@ -128,26 +106,22 @@ namespace GA.Sessions.Class_03.Scripts
                 return;
             }
 
-           
             int idx = candidates.IndexOf(ParentCharacter.LockTarget);
             if (idx == -1)
             {
-               
                 currentIndex = 0;
                 ParentCharacter.LockTarget = candidates[currentIndex];
                 return;
             }
 
-            // avanza circularmente
             currentIndex = (idx + 1) % candidates.Count;
             ParentCharacter.LockTarget = candidates[currentIndex];
         }
 
-       
         private void UpdateCandidates()
         {
             candidates.Clear();
-            Collider[] cols = Physics.OverlapSphere(transform.position, detectionRadius, detectionMask);
+            Collider[] cols = Physics.OverlapSphere(transform.position, detectionRadius, targetMask);
             foreach (var col in cols)
             {
                 if (col == null) continue;
@@ -157,7 +131,6 @@ namespace GA.Sessions.Class_03.Scripts
 
             if (camera == null) return;
 
-           
             Vector3 camForward = Vector3.ProjectOnPlane(camera.transform.forward, camera.transform.up).normalized;
             Vector3 camUp = camera.transform.up;
 
@@ -171,13 +144,33 @@ namespace GA.Sessions.Class_03.Scripts
             });
         }
 
-       
+        // ================== LINE OF SIGHT ==================
+        private void Update()
+        {
+            if (ParentCharacter == null || ParentCharacter.LockTarget == null) return;
+
+            Transform target = ParentCharacter.LockTarget;
+            Vector3 origin = camera.transform.position;
+            Vector3 dir = (target.position - origin).normalized;
+            float dist = Vector3.Distance(origin, target.position);
+
+            if (Physics.Raycast(origin, dir, out RaycastHit hit, dist, obstacleMask))
+            {
+                if (hit.transform != target)
+                {
+                    // Si algo se interpone, se pierde el lock
+                    ParentCharacter.LockTarget = null;
+                    currentIndex = -1;
+                }
+            }
+        }
+
+        // ================== GIZMOS ==================
         private void OnDrawGizmos()
         {
             Gizmos.color = gizmoColor;
             Gizmos.DrawWireSphere(transform.position, detectionRadius);
 
-           
             UpdateCandidates();
 
             Gizmos.color = Color.yellow;
