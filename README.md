@@ -14,7 +14,7 @@ Este proyecto implementa un **TPS Controller** en Unity con tres personajes juga
 * **Mouse** → Control de cámara 
 * **Click derecho (Hold)** → Apuntar 
 * **Click izquierdo** → Disparar 
-* **Botón central del mouse → Activar/Desactivar Lock-On
+* **Botón central del mouse** → Activar/Desactivar Lock-On
 * **Q** → Cambiar objetivo cuando hay lock-on
 
 ---
