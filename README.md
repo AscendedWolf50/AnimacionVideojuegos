@@ -83,11 +83,5 @@ Existen **3 personajes distintos**, con diferencias claras en fire rate, recoil 
 
 ---
 
-## Video / Gif
-
-[Enlace al video de demostración](TU_LINK_AQUI)
-(Muestra: selección de los 3 personajes, diferencias en disparo y zoom, lock-on básico, conmutación de objetivos y persistencia con obstáculos).
-
----
 
 
