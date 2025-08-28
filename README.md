@@ -1,4 +1,4 @@
-# AnimacionVideojuegos
+
 
 # Entrega 2 - TPS Controller 
 
@@ -16,28 +16,29 @@ Este proyecto implementa un **TPS Controller** en Unity con tres personajes juga
 * **Click izquierdo** → Disparar 
 * **Botón central del mouse** → Activar/Desactivar Lock-On
 * **Q** → Cambiar objetivo cuando hay lock-on
+* **Esc** → Salir del juego
 
 ---
 
 ## Personajes Jugables
 
-Existen **3 personajes distintos**, con diferencias claras en fire rate, recoil y zoom:
+Existen **3 prefabs distintos**, con diferencias claras en velocidad, fire rate, recoil y zoom:
 
-1. **Asalto (estándar) (Llamado "Ninja" dentro de la escena)**
+1. **Asalto (estándar)**
 
    * Fire Rate: medio
    * Recoil: normal
    * Zoom: estándar (al hombro)
    * Sensación de fusil de asalto
 
-2. **Pesado (sniper) (Llamado "Soldier" dentro de la escena)**
+2. **Pesado (sniper)**
 
    * Fire Rate: muy bajo
    * Recoil: muy fuerte
-   * Zoom: alto (más cerrado)
+   * Zoom: alto (más cerrado, como mirilla)
    * Sensación de francotirador
 
-3. **Ligero (minigun) (Llamado "Alien" dentro de la escena)**
+3. **Ligero (minigun)**
 
    * Fire Rate: muy alto
    * Recoil: elevado pero sostenido
@@ -69,19 +70,29 @@ Existen **3 personajes distintos**, con diferencias claras en fire rate, recoil 
 
   1. Activar lock-on con el **botón central del mouse** sobre un enemigo.
   2. Presionar **Q** → el objetivo va rotando entre los enemigos visibles en escena.
+* **Edge cases:**
 
+  * Si solo hay un objetivo, no se cambia.
 
 ### 2. Persistencia del Lock-On (line of sight)
 
-* **Qué hace:** si un obstáculo (objeto en el layer "obstacle" se interpone entre la cámara y el objetivo, el lock se pierde automáticamente.
+* **Qué hace:** si un obstáculo se interpone entre la cámara y el objetivo, el lock se pierde automáticamente.
 * **Cómo probarlo:**
 
   1. Activar lock-on sobre un enemigo.
   2. Moverse detrás del muro en la escena.
   3. El lock se libera automáticamente.
+* **Edge cases:**
 
+  * Si el objetivo reaparece en línea de visión, hay que reactivar el lock manualmente.
+  * Se puede perder el lock aunque el enemigo esté muy cerca, si hay un obstáculo en el medio.
 
 ---
+
+## Video / Gif
+
+[Enlace al video de demostración](https://youtu.be/tf8l9jCpbuU)
+(Muestra: selección de los 3 personajes, diferencias en disparo y zoom, lock-on básico, conmutación de objetivos y persistencia con obstáculos).
 
 
 
